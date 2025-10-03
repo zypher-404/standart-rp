@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Standard RP - Ролевая игра на телефон</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Основные стили */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #0a0e17;
+            --secondary: #0f1420;
+            --accent: #00d4ff;
+            --accent-blue: #3a86ff;
+            --text: #e6f1ff;
+            --text-secondary: #8a9bb8;
+            --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: var(--text);
+            overflow-x: hidden;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Стеклянный эффект */
+        .glass {
+            background: rgba(10, 20, 40, 0.25);
+            backdrop-filter: blur(15px);
+            border-radius: 16px;
+            border: 1px solid rgba(64, 156, 255, 0.18);
+            box-shadow: 0 8px 32px rgba(0, 10, 30, 0.4);
+        }
+
+        /* Контейнер */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Шапка */
+        header {
+            padding: 20px 0;
+            position: fixed;
+            width: 100%;
+            z-index: 1000;
+            transition: var(--transition);
+            background: transparent;
+        }
+
+        header.scrolled {
+            background: rgba(10, 14, 23, 0.85);
+            backdrop-filter: blur(15px);
+            padding: 15px 0;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 1001;
+        }
+
+        .logo img {
+            height: 50px;
+            border-radius: 12px;
+            transition: var(--transition);
+            filter: drop-shadow(0 0 10px rgba(0, 212, 255, 0.4));
+        }
+
+        .logo:hover img {
+            transform: scale(1.05) rotate(2deg);
+        }
+
+        .logo-text {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--accent), var(--accent-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 15px rgba(0, 212, 255, 0.4);
+        }
+
+        /* Гамбургер меню */
+        .menu-toggle {
+            display: none;
+            flex-direction: column;
+            justify-content: space-between;
+            width: 30px;
+            height: 21px;
+            cursor: pointer;
+            z-index: 1001;
+        }
+
+        .menu-toggle span {
+            display: block;
+            height: 3px;
+            width: 100%;
+            background: var(--accent);
+            border-radius: 3px;
+            transition: var(--transition);
+            transform-origin: center;
+        }
+
+        .menu-toggle.active span:nth-child(1) {
+            transform: rotate(45deg) translate(6px, 6px);
+        }
+
+        .menu-toggle.active span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .menu-toggle.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(6px, -6px);
+        }
+
+        nav {
+            transition: var(--transition);
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 30px;
+        }
+
+        nav a {
+            color: var(--text);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+            position: relative;
+            padding: 5px 0;
+        }
+
+        nav a:hover {
+            color: var(--accent);
+        }
+
+        nav a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background: linear-gradient(90deg, var(--accent), var(--accent-blue));
+            transition: var(--transition);
+        }
+
+        nav a:hover::after {
+            width: 100%;
+        }
+
+        /* Главный экран */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding-top: 100px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(0, 212, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(58, 134, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(0, 212, 255, 0.05) 0%, transparent 50%);
+            z-index: -1;
+        }
+
+        .hero-content {
+            max-width: 700px;
+            padding: 50px;
+            animation: fadeInUp 1.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-content::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(0, 212, 255, 0.05), transparent);
+            transform: rotate(45deg);
+            animation: shine 8s infinite linear;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, var(--accent), var(--accent-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1.2;
+            text-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            margin-bottom: 30px;
+            color: var(--text-secondary);
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 15px 35px;
+            background: linear-gradient(90deg, var(--accent), var(--accent-blue));
+            color: var(--primary);
+            border: none;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            text-decoration: none;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 5px 15px rgba(0, 212, 255, 0.4);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 212, 255, 0.6);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.7s ease;
+            z-index: -1;
+        }
+
+        .btn:hover::after {
+            left: 100%;
+        }
+
+        /* Разделы */
+        section {
+            padding: 100px 0;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 60px;
+            font-size: 2.5rem;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent), var(--accent-blue));
+            border-radius: 2px;
+        }
+
+        /* Роли */
+        .roles {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+        }
+
+        .role-card {
+            padding: 30px;
+            text-align: center;
+            transition: var(--transition);
+            opacity: 0;
+            transform: translateY(30px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .role-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.08), transparent);
+            transition: left 0.7s ease;
+        }
+
+        .role-card:hover::before {
+            left: 100%;
+        }
+
+        .role-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .role-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 30, 80, 0.5);
+        }
+
+        .role-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: var(--accent);
+            filter: drop-shadow(0 0 10px rgba(0, 212, 255, 0.4));
+        }
+
+        .role-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: var(--text);
+        }
+
+        .role-card p {
+            color: var(--text-secondary);
+        }
+
+        /* Особенности */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .feature {
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            opacity: 0;
+            transform: translateX(-30px);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(58, 134, 255, 0.08), transparent);
+            transition: left 0.7s ease;
+        }
+
+        .feature:hover::before {
+            left: 100%;
+        }
+
+        .feature.visible {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .feature:nth-child(even) {
+            transform: translateX(30px);
+        }
+
+        .feature:nth-child(even).visible {
+            transform: translateX(0);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: var(--accent-blue);
+            filter: drop-shadow(0 0 10px rgba(58, 134, 255, 0.4));
+        }
+
+        .feature h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+
+        /* Призыв к действию */
+        .cta {
+            text-align: center;
+            padding: 80px 0;
+        }
+
+        .cta h2 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+
+        .cta p {
+            font-size: 1.2rem;
+            margin-bottom: 40px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            color: var(--text-secondary);
+        }
+
+        /* Подвал */
+        footer {
+            padding: 50px 0 30px;
+            text-align: center;
+            border-top: 1px solid rgba(0, 212, 255, 0.1);
+        }
+
+        .footer-logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, var(--accent), var(--accent-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .copyright {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-top: 30px;
+        }
+
+        /* Анимации */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(0, 212, 255, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 15px rgba(0, 212, 255, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(0, 212, 255, 0);
+            }
+        }
+
+        @keyframes shine {
+            0% {
+                transform: rotate(45deg) translateX(-100%);
+            }
+            100% {
+                transform: rotate(45deg) translateX(100%);
+            }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: row;
+            }
+
+            .menu-toggle {
+                display: flex;
+            }
+
+            nav {
+                position: fixed;
+                top: 0;
+                right: -100%;
+                width: 70%;
+                height: 100vh;
+                background: rgba(10, 14, 23, 0.95);
+                backdrop-filter: blur(15px);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: var(--transition);
+                z-index: 1000;
+            }
+
+            nav.active {
+                right: 0;
+            }
+
+            nav ul {
+                flex-direction: column;
+                gap: 30px;
+                text-align: center;
+            }
+
+            nav a {
+                font-size: 1.2rem;
+                padding: 10px 20px;
+            }
+
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero p {
+                font-size: 1.1rem;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Шапка -->
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <img src="https://i.postimg.cc/ZKNH7YYw/gs-QP9-Lz-Mc-DEhj-PTzk65pi-Blz-V3-Yo-K1i0-V8-Xc-UFH2m-JFx-JNxxp-mqbe21gu-Ds1v-Hkf-D-L21o7-Q0j-XEou-HDErp-V208.jpg" alt="Standard RP Logo">
+                    <div class="logo-text">Standard RP</div>
+                </div>
+                <div class="menu-toggle">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+                <nav>
+                    <ul>
+                        <li><a href="#about">О проекте</a></li>
+                        <li><a href="#roles">Роли</a></li>
+                        <li><a href="#features">Особенности</a></li>
+                        <li><a href="#download">Скачать</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Главный экран -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content glass">
+                <h1>Standard RP — это игра на телефон (CRMP)</h1>
+                <p>Где ты сможешь стать полицейским, бандитом, стрелком и много кем еще угодно! Скачивай и играй вместе с нами!</p>
+                <a href="https://drive.google.com/uc?export=download&id=1NFVmxyTLyfa4SJu1XNmfDRw9-K5MQ0_L" class="btn pulse">Скачать игру</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- О проекте -->
+    <section id="about">
+        <div class="container">
+            <h2 class="section-title">О проекте</h2>
+            <div class="glass" style="padding: 50px; text-align: center;">
+                <p style="font-size: 1.2rem; line-height: 1.8;">
+                    Standard RP - это уникальная ролевая игра для мобильных устройств, созданная на платформе CRMP. 
+                    Погрузитесь в захватывающий мир, где каждый может выбрать свою роль и развивать персонажа в динамичной среде. 
+                    Взаимодействуйте с другими игроками, создавайте альянсы, участвуйте в захватывающих событиях и станьте частью нашего растущего сообщества!
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Роли -->
+    <section id="roles">
+        <div class="container">
+            <h2 class="section-title">Выбери свою роль</h2>
+            <div class="roles">
+                <div class="role-card glass">
+                    <div class="role-icon">👮</div>
+                    <h3>Полицейский</h3>
+                    <p>Поддерживайте порядок в городе, расследуйте преступления и защищайте мирных жителей.</p>
+                </div>
+                <div class="role-card glass">
+                    <div class="role-icon">🔫</div>
+                    <h3>Бандит</h3>
+                    <p>Создайте свою преступную группировку, участвуйте в ограблениях и доминируйте в криминальном мире.</p>
+                </div>
+                <div class="role-card glass">
+                    <div class="role-icon">🎯</div>
+                    <h3>Стрелок</h3>
+                    <p>Станьте наемником, выполняйте контракты и оттачивайте свои боевые навыки.</p>
+                </div>
+                <div class="role-card glass">
+                    <div class="role-icon">🚑</div>
+                    <h3>Медик</h3>
+                    <p>Спасайте жизни, оказывайте медицинскую помощь и работайте в экстренных службах.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Особенности -->
+    <section id="features">
+        <div class="container">
+            <h2 class="section-title">Особенности игры</h2>
+            <div class="features">
+                <div class="feature glass">
+                    <div class="feature-icon">🌍</div>
+                    <h3>Открытый мир</h3>
+                    <p>Исследуйте огромный город с различными районами и локациями.</p>
+                </div>
+                <div class="feature glass">
+                    <div class="feature-icon">👥</div>
+                    <h3>Мультиплеер</h3>
+                    <p>Играйте вместе с тысячами других игроков со всего мира.</p>
+                </div>
+                <div class="feature glass">
+                    <div class="feature-icon">🎭</div>
+                    <h3>Глубокая ролевая система</h3>
+                    <p>Развивайте своего персонажа, получайте новые навыки и способности.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Призыв к действию -->
+    <section id="download" class="cta">
+        <div class="container">
+            <h2>Готов начать приключение?</h2>
+            <p>Присоединяйтесь к нашему сообществу прямо сейчас! Скачайте игру и окунитесь в захватывающий мир Standard RP.</p>
+            <a href="https://drive.google.com/uc?export=download&id=1NFVmxyTLyfa4SJu1XNmfDRw9-K5MQ0_L" class="btn">Скачать игру</a>
+        </div>
+    </section>
+
+    <!-- Подвал -->
+    <footer>
+        <div class="container">
+            <div class="footer-logo">Standard RP</div>
+            <p>Лучшая ролевая игра для мобильных устройств</p>
+            <div class="copyright">
+                &copy; 2023 Standard RP. Все права защищены.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Анимация при прокрутке
+        document.addEventListener('DOMContentLoaded', function() {
+            // Анимация элементов при прокрутке
+            const animateOnScroll = function() {
+                const elements = document.querySelectorAll('.role-card, .feature');
+                
+                elements.forEach(element => {
+                    const elementPosition = element.getBoundingClientRect().top;
+                    const screenPosition = window.innerHeight / 1.2;
+                    
+                    if (elementPosition < screenPosition) {
+                        element.classList.add('visible');
+                    }
+                });
+            };
+            
+            // Запуск анимации при загрузке и прокрутке
+            window.addEventListener('scroll', animateOnScroll);
+            animateOnScroll();
+            
+            // Изменение шапки при прокрутке
+            window.addEventListener('scroll', function() {
+                const header = document.querySelector('header');
+                if (window.scrollY > 50) {
+                    header.classList.add('scrolled');
+                } else {
+                    header.classList.remove('scrolled');
+                }
+            });
+            
+            // Гамбургер меню
+            const menuToggle = document.querySelector('.menu-toggle');
+            const nav = document.querySelector('nav');
+            
+            menuToggle.addEventListener('click', function() {
+                this.classList.toggle('active');
+                nav.classList.toggle('active');
+            });
+            
+            // Закрытие меню при клике на ссылку
+            document.querySelectorAll('nav a').forEach(link => {
+                link.addEventListener('click', function() {
+                    menuToggle.classList.remove('active');
+                    nav.classList.remove('active');
+                    
+                    // Плавная прокрутка к якорям
+                    const targetId = this.getAttribute('href');
+                    const targetElement = document.querySelector(targetId);
+                    
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 100,
+                        behavior: 'smooth'
+                    });
+                });
+            });
+            
+            // Обработка кнопки скачивания
+            document.querySelectorAll('.btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    if (this.getAttribute('href') === '#download') {
+                        e.preventDefault();
+                        document.querySelector('#download').scrollIntoView({
+                            behavior: 'smooth'
+                        });
+                    } else {
+                        console.log('Пользователь начал скачивание игры');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
